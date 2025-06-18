@@ -90,14 +90,17 @@ jobs:
     - name: Create and push multiarch manifest
       run: |
         docker buildx imagetools create           --tag ghcr.io/${{ github.actor }}/immortalwrt:latest           --tag ghcr.io/${{ github.actor }}/immortalwrt:${{ env.IMMORTALWRT_VERSION }}           ghcr.io/${{ github.actor }}/immortalwrt:arm64           ghcr.io/${{ github.actor }}/immortalwrt:amd64
-
+        
+    - name: List working dir
+      run: ls -lah ${{ github.workspace }}
+      
     - name: Push README to Docker Hub
       uses: peter-evans/dockerhub-description@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         repository: ${{ secrets.DOCKERHUB_USERNAME }}/immortalwrt
-        readme-filepath: ./README.md
+        readme-filepath: ${{ github.workspace }}/README.md
         short-description: "Multi-arch ImmortalWrt Docker image"
 
     - name: Create GitHub Release
