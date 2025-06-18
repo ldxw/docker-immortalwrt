@@ -37,7 +37,7 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
-        username: ${{ github.actor }}
+        username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Log in to Docker Hub
@@ -84,7 +84,7 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
-        username: ${{ github.actor }}
+        username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create and push multiarch manifest
@@ -94,9 +94,9 @@ jobs:
     - name: Push README to GHCR
       uses: peter-evans/dockerhub-description@v3
       with:
-        username: ${{ github.actor }}
+        username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-        repository: ghcr.io/${{ github.actor }}/immortalwrt
+        repository: ghcr.io/${{ github.repository_owner }}/immortalwrt
         readme-filepath: ./README.md
         registry: ghcr.io
 
@@ -112,9 +112,9 @@ jobs:
     - name: Push README to GHCR
       uses: peter-evans/dockerhub-description@v3
       with:
-        username: ${{ github.actor }}
+        username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-        repository: ghcr.io/${{ github.actor }}/immortalwrt
+        repository: ghcr.io/${{ github.repository_owner }}/immortalwrt
         readme-filepath: ./README.md
         registry: ghcr.io
 
