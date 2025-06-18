@@ -97,7 +97,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         repository: ${{ secrets.DOCKERHUB_USERNAME }}/immortalwrt
-        readme-filepath: ${{ github.workspace }}/README.md
+        readme-filepath: ./README.md
         short-description: "Multi-arch ImmortalWrt Docker image"
 
     - name: Create GitHub Release
