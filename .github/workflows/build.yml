@@ -82,7 +82,7 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
-      
+
     - name: Log in to GHCR
       uses: docker/login-action@v2
       with:
@@ -90,13 +90,28 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Create and push multiarch manifest
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Create and push GHCR multiarch manifest
       run: |
-        docker buildx imagetools create           --tag ghcr.io/${{ github.actor }}/immortalwrt:latest           --tag ghcr.io/${{ github.actor }}/immortalwrt:${{ env.IMMORTALWRT_VERSION }}           ghcr.io/${{ github.actor }}/immortalwrt:arm64           ghcr.io/${{ github.actor }}/immortalwrt:amd64
-        
-    - name: List working dir
-      run: ls -lah ${{ github.workspace }}
-      
+        docker buildx imagetools create \
+          --tag ghcr.io/${{ github.actor }}/immortalwrt:latest \
+          --tag ghcr.io/${{ github.actor }}/immortalwrt:${{ env.IMMORTALWRT_VERSION }} \
+          ghcr.io/${{ github.actor }}/immortalwrt:arm64 \
+          ghcr.io/${{ github.actor }}/immortalwrt:amd64
+
+    - name: Create and push Docker Hub multiarch manifest
+      run: |
+        docker buildx imagetools create \
+          --tag docker.io/${{ secrets.DOCKERHUB_USERNAME }}/immortalwrt:latest \
+          --tag docker.io/${{ secrets.DOCKERHUB_USERNAME }}/immortalwrt:${{ env.IMMORTALWRT_VERSION }} \
+          docker.io/${{ secrets.DOCKERHUB_USERNAME }}/immortalwrt:arm64 \
+          docker.io/${{ secrets.DOCKERHUB_USERNAME }}/immortalwrt:amd64
+
     - name: Push README to Docker Hub
       uses: peter-evans/dockerhub-description@v3
       with:
@@ -117,8 +132,12 @@ jobs:
           **Tags Pushed:**
           - ghcr.io/${{ github.actor }}/immortalwrt:latest
           - ghcr.io/${{ github.actor }}/immortalwrt:${{ env.IMMORTALWRT_VERSION }}
+          - docker.io/${{ secrets.DOCKERHUB_USERNAME }}/immortalwrt:latest
+          - docker.io/${{ secrets.DOCKERHUB_USERNAME }}/immortalwrt:${{ env.IMMORTALWRT_VERSION }}
           - ghcr.io/${{ github.actor }}/immortalwrt:arm64
           - ghcr.io/${{ github.actor }}/immortalwrt:amd64
+          - docker.io/${{ secrets.DOCKERHUB_USERNAME }}/immortalwrt:arm64
+          - docker.io/${{ secrets.DOCKERHUB_USERNAME }}/immortalwrt:amd64
 
           🧱 Auto-generated from commit: ${{ github.sha }}
       env:
