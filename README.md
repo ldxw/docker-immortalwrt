@@ -2,7 +2,7 @@
 
 轻量级 OpenWrt 系统镜像，基于 ImmortalWrt 构建，支持以下平台：
 
-- ✅ x86_64
+- ✅ amd64
 - ✅ arm64
 
 ## 🐳 使用示例
@@ -14,7 +14,7 @@ docker run --rm -it ghcr.io/ldxw/immortalwrt:latest sh
 ## 📦 镜像标签结构
 
 - :arm64
-- :x86_64
+- :amd64
 - :latest
 - :24.10.0-rc3
 
