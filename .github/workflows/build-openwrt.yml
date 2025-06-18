@@ -1,0 +1,81 @@
+name: Build & Push docker OpenWrt
+
+on:
+  workflow_dispatch:
+    inputs:
+      rootfs_url:
+        description: "RootFS 下载地址"
+        required: false
+        default: "https://github.com/ldxw/N1-OpenWrt/releases/download/OpenWrt_N1_06.19.0012/openwrt-armsr-armv8-generic-rootfs.tar.gz"
+      arch:
+        description: "构建架构（如 arm64 或 amd64）"
+        required: false
+        default: "arm64"
+      image_tag_name:
+        description: "镜像标签名称（如 n1、x86）"
+        required: false
+        default: "n1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      ROOTFS_URL: ${{ github.event.inputs.rootfs_url }}
+      ARCH: ${{ github.event.inputs.arch || 'arm64' }}
+      IMAGE_TAG_NAME: ${{ github.event.inputs.image_tag_name || 'n1' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to GHCR
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Set date tag
+      id: vars
+      run: echo "date_tag=$(date +%Y%m%d)" >> $GITHUB_OUTPUT
+
+    - name: Download and prepare rootfs
+      run: |
+        mkdir -p docker
+        echo "Downloading from: $ROOTFS_URL"
+        wget -O docker/rootfs.tar.gz "$ROOTFS_URL"
+        tar -xf docker/rootfs.tar.gz -C docker
+        mv docker/rootfs.tar.gz docker/rootfs.tar
+
+    - name: Write Dockerfile
+      run: |
+        cat <<EOF > docker/Dockerfile
+        FROM scratch
+        ADD rootfs.tar /
+        EOF
+
+    - name: Build & Push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./docker
+        file: ./docker/Dockerfile
+        platforms: linux/${{ env.ARCH }}
+        push: true
+        tags: |
+          docker.io/ldxw/openwrt:${{ env.IMAGE_TAG_NAME }}
+          docker.io/ldxw/openwrt:${{ env.IMAGE_TAG_NAME }}-${{ steps.vars.outputs.date_tag }}
+          ghcr.io/${{ github.actor }}/openwrt:${{ env.IMAGE_TAG_NAME }}
+          ghcr.io/${{ github.actor }}/openwrt:${{ env.IMAGE_TAG_NAME }}-${{ steps.vars.outputs.date_tag }}
